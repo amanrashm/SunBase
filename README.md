@@ -64,3 +64,6 @@ Endpoint: /api/customers/{customerId}
 
 Added functionalities to make it more real to use in project
 
+
+![image](https://github.com/amanrashm/SunBase/assets/104130538/c61dd7d2-d0b6-49c8-a961-1ede8a70ff3e)
+
