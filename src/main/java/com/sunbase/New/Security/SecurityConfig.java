@@ -1,12 +1,10 @@
 package com.sunbase.New.Security;
 
+import com.sunbase.New.Repository.UserInfoRepository;
 import com.sunbase.New.Service.UserInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,28 +17,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthFilter authFilter;
+    private UserInfoRepository userRepository;
 
     // User Creation
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserInfoService();
+        return new UserInfoService(userRepository, passwordEncoder());
     }
 
     // Configuring HttpSecurity
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/welcome")).permitAll()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/addNewUser")).permitAll()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/auth/welcome")).permitAll()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/user/**")).authenticated()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/admin/**")).authenticated()
-                .dispatcherTypeMatchers(HttpMethod.valueOf("/auth/admin/**")).hasRole("ADMIN")  // You may customize this based on your roles
-                .anyRequest().authenticated()
-                .and()
+                .authorizeRequests(authorizeRequests -> {
+                            authorizeRequests
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/welcome" )).permitAll()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/login")).permitAll()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/addNewUser")).permitAll()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/register")).permitAll()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/user/**")).authenticated()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/api/customers/admin/**")).authenticated()
+                                    .dispatcherTypeMatchers(HttpMethod.valueOf("/auth/admin/**")).hasRole("ADMIN")
+                                    // You may customize this based on your roles
+                                    .anyRequest().authenticated();
+                        }
+                )
                 .addFilterBefore(authFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -55,13 +56,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
     }
 }

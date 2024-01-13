@@ -10,29 +10,139 @@
 
     <style>
         body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+    <script>
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Validation
+            if (!username.trim() || !password.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Please enter both username and password.',
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (response.ok) {
+                    // Login successful
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful',
+                        text: 'You have successfully logged in.',
+                    });
+                } else {
+                    // Login failed
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Failed',
+                        text: 'Invalid username or password.',
+                    });
+                }
+            } catch (error) {
+                // Handle other errors
+                console.error('Login error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="login-container">
+    <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); login();">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+<style>
+    body {
         font-family: 'Arial', sans-serif;
         background-color: #f5f5f5;
         margin: 0;
         padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
     }
 
-    .login-container {
+    .container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
         background-color: #ffffff;
-        border: 1px solid #dddddd;
+        border: 1px solid #ddd;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
     }
 
-    .login-form {
+    .customer-form {
         display: flex;
         flex-direction: column;
-        max-width: 300px;
-        margin: 0 auto;
     }
 
     label {
@@ -47,6 +157,7 @@
         box-sizing: border-box;
         border: 1px solid #ddd;
         border-radius: 4px;
+        font-size: 16px;
     }
 
     button {
@@ -56,38 +167,10 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        font-size: 16px;
     }
 
     button:hover {
         background-color: #2980b9;
     }
-    </style>
-    <script>
-        function validateForm() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        if (!username.trim() || !password.trim()) {
-            alert('Please enter both username and password.');
-            return false; // Prevent form submission
-        }
-        // If validation passes, continue with form submission
-        return true;
-    }</script>
-</head>
-<body>
-<div class="login-container">
-    <form id="loginForm" class="login-form">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
-        <button type="button" onclick="login(),validateForm()">Login</button>
-    </form>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
+</style>

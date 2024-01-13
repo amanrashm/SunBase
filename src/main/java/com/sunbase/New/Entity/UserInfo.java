@@ -21,8 +21,14 @@ public class UserInfo {
     @Column(name = "password", length = 25, nullable = false)
     private String password;
 
-    @Column(name = "Full_name", length = 25, nullable = false)
-    private String name;
+    @Column(name = "First_name", length = 25, nullable = false)
+    private String firstName;
+
+    @Column(name = "Last_name", length = 25, nullable = false)
+    private String lastName;
+
+    @Column(name = "Full_name", length = 50, nullable = false)
+    private String name = firstName + " " + lastName;
 
     @Column(name = "street", length = 25, nullable = false)
     private String street;
