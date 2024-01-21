@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management UI</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Bootstrap JS (Popper.js and jQuery are required for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Be Our Precious Customer </h1>
+
+    <!-- Add a new customer form -->
+    <form id="addUserForm" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="ID">ID</label>
+            <input type="text" class="form-control" id="ID" required>
+
+        <div class="form-group">
+            <label for="userName">Username</label>
+            <input type="text" class="form-control" id="userName" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" id="firstName" required>
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" id="lastName" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" required>
+        </div>
+
+
+        <div class="form-group">
+            <label for="street">Street</label>
+            <input type="text" class="form-control" id="street" required>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" class="form-control" id="address" required>
+        </div>
+
+        <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" class="form-control" id="state" required>
+        </div>
+
+        <div class="form-group">
+            <label for="zip">Zip</label>
+            <input type="text" class="form-control" id="zip" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" class="form-control" id="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="roles">Roles</label>
+            <input type="text" class="form-control" id="roles" required>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="addUser()">Add User</button>
+        <button type="button" class="btn btn-primary" onclick="syncData()">Sync Data</button>
+        <button type="button" class="btn btn-primary" onclick="getUsers(firstName,lastName)">Get Users</button>
+        <button type="button" class="btn btn-primary" onclick="editUser(ID)">Edit User</button>
+        <button type="button" class="btn btn-primary" onclick="deleteUser(ID)">Delete User</button>
+        <button type="button" class="btn btn-primary" onclick="displayUsers()">display Users</button>
+
+    </form>
+
+    <hr>
+
+    <!-- User List -->
+    <h2>User List</h2>
+    <table class="table">
+<!--        <thead>-->
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Address</th>
+            <th>State</th>
+            <th>Zip</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <!-- Add other table headers here -->
+            <th>Actions</th>
+        </tr>
+<!--        </thead>-->
+        <tbody id="data-container"></tbody>
+        <tbody id="userTableBody"></tbody>
+        <tbody id="all-users-container"></tbody>
+        <!-- User data will be displayed here -->
+
+    </table>
+
+    <div id="response" class="alert alert-info"></div>
+</div>
+<div>
+    <label for="customerId">Enter Customer ID:</label>
+    <input type="text" id="customerId" placeholder="Enter ID">
+
+    <!-- Button to trigger the API call -->
+    <button type="button" class="btn btn-primary" onclick="getCustomerById()">Get Customer</button>
+
+    <!-- Display area for the result -->
+    <div id="searchResult"></div>
+</div>
+<script>
+    // Function to add a new user
+    function addUser() {
+        const userData = {
+            userName: document.getElementById('userName').value,
+            password: document.getElementById('password').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            name: document.getElementById('name').value,
+            street: document.getElementById('street').value,
+            address: document.getElementById('address').value,
+            state: document.getElementById('state').value,
+            zip: document.getElementById('zip').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            role: document.getElementById('roles').value,
+
+        };
+        try {
+            console.log('Adding user:', userData);
+            const response = callApi("/api/customers/addCustomer", 'POST', userData);
+            console.log('User added successfully:', response);
+            document.getElementById('response').innerText = response;
+            getUsers(firstName, lastName);
+        } catch (error) {
+            console.error('Error adding user:', error);
+        }
+    }
+
+    // Function to display users in the table
+    function displayUsers() {
+        try {
+            const id = document.getElementById('ID').value;
+            const usersResponse = callApi('/api/customers/getAllCustomers', 'GET');
+            console.log('Users:', usersResponse);
+            const users = usersResponse.json();
+            console.log('List of users:', users);
+            displayDataOnWebpage(users);
+            // clear the table
+            document.getElementById('userTableBody').innerHTML = '';
+            // show the data in tabluar format
+            users.forEach(user => {
+            document.getElementById('userTableBody').innerHTML += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.userName}</td>
+                    <td>${user.password}</td>
+                    <td>${user.email}</td>
+                    <td>${user.firstName}</td>
+                    <td>${user.lastName}</td>
+                    <td>${user.address}</td>
+                    <td>${user.state}</td>
+                    <td>${user.zip}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" onclick="editUser(${user.id})">Edit</button>
+                        <button type="button" class="btn btn-primary" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+});
+        } catch (error) {
+            console.error('Error displaying users:', error);
+
+}
+    }
+    // Function to edit a user
+    async function editUser(id) {
+        try {
+            const id = document.getElementById('ID').value;
+            const userResponse = await callApi(`/api/customers/updateCustomer/${id}`, 'PUT');
+            console.log('User:', userResponse);
+            const user = await userResponse.json();
+            // Populate the form with user data for editing
+            document.getElementById('userName').value = user.userName;
+            document.getElementById('password').value = user.password;
+            document.getElementById('firstName').value = user.firstName;
+            document.getElementById('lastName').value = user.lastName;
+            document.getElementById('street').value = user.street;
+            document.getElementById('address').value = user.address;
+            document.getElementById('state').value = user.state;
+            document.getElementById('zip').value = user.zip;
+            document.getElementById('email').value = user.email;
+            document.getElementById('phone').value = user.phone;
+            document.getElementById('roles').value = user.roles;
+        } catch (error) {
+            console.error('Error editing user:', error);
+        }
+    }
+
+    // Function to delete a user
+    async function deleteUser(id) {
+        try {
+            const id = document.getElementById('ID').value;
+            await callApi(`/api/customers/deleteCustomer/${id}`, 'DELETE');
+            console.log('User deleted successfully');
+            //getUsers();
+            displayDataOnWebpage(id)
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    }
+
+    // Function to get users and display them
+    async function getUsers(firstName, lastName) {
+        try {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const url = `/api/customers/getCustomers?firstName=${firstName}&lastName=${lastName}`;
+            console.log('Fetching users:', url);
+            const users = await callApi(url, 'GET');/*
+            const { setData } = users;
+            console.log('Destructured data:', setData);*/
+            displayDataOnWebpage(users);
+            console.log('List of users:', users);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    }
+
+
+
+    // Function to make API calls
+    async function callApi(endpoint, method, data) {
+        console.log(`Calling API: ${method} ${endpoint} ${data ? JSON.stringify(data) : ''}`);
+        const url = `http://localhost:8080${endpoint}`;
+
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: data ? JSON.stringify(data) : null,
+        };
+
+        const response = await fetch(url, options);
+
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            }
+            return response.text();
+        } else {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+    }
+    async function syncData() {
+        try {
+            const endpoint = "/api/customers/syncData";
+            const url = `http://localhost:8080${endpoint}`;
+            console.log('Syncing data:', url);
+
+            const authRequest = {
+                username: 'test@sunbasedata.com',
+                password: 'Test@123',
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(authRequest),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to sync data: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('Data synchronized successfully:', data);
+
+            // Update the HTML content with the received data
+            displayDataOnWebpage(data);
+        } catch (error) {
+            console.error('Error during data synchronization:', error);
+        }
+    }
+
+    function displayDataOnWebpage(data) {
+        const dataContainer = document.getElementById('data-container');
+
+        // Clear previous content
+        dataContainer.innerHTML = '';
+
+        // Iterate over the data and create HTML elements to display it
+        data.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.textContent = JSON.stringify(item);
+            dataContainer.appendChild(listItem);
+        });
+    }
+
+
+
+    function getCustomerById() {
+        try {
+            // Get the entered ID from the input field
+            const customerId = document.getElementById('customerId').value;
+
+            // Validate that the entered ID is not empty
+            if (!customerId) {
+                alert('Please enter a valid Customer ID.');
+                return;
+            }
+            var endpoint = `/api/customers/getCustomer/${customerId}`;
+            const url = `http://localhost:8080${endpoint}`
+            console.log('Fetching customer:', url);
+            // Make the API call to get the customer by ID
+
+
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(customer => {
+                    // Process the retrieved user data
+                    setData(customer);
+                    console.log('User Data:', customer);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+
+
+
+            /*var response = fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Failed to get customer: ${response.statusText}`);
+            }*/
+
+          //  const customer = response.json();
+
+            // Display the result in the specified area
+
+        } catch (error) {
+            console.error('Error getting customer by ID:', error);
+        }
+    }
+
+
+
+    function setData(customer){
+        const searchResult = document.getElementById('searchResult');
+        searchResult.innerHTML = `
+                <h3>Customer Details:</h3>
+                <table>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Address</th>
+        <th>State</th>
+        <th>Zip</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Role</th>
+    </tr>
+    let result = objArray.map(({ customer }) => customer)
+    console.log(result);
+    <tr>
+        <td>${customer.id}</td>
+        <td>${customer.userName}</td>
+        <td>${customer.firstName}</td>
+        <td>${customer.lastName}</td>
+        <td>${customer.address}</td>
+        <td>${customer.state}</td>
+        <td>${customer.zip}</td>
+        <td>${customer.email}</td>
+        <td>${customer.phone}</td>
+        <td>${customer.role}</td>
+    </tr>
+</table>
+
+            `;
+    }
+    async function displayAllUsers() {
+        try {
+            const endpoint = "/api/users/getAllCustomers ";
+            const url = `http://localhost:8080${endpoint}`;
+            console.log('Fetching all users:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch all users: ${response.statusText}`);
+            }
+
+            const allUsers = await response.json();
+            console.log('All users:', allUsers);
+
+            // Update the HTML content with the received data
+            displayAllUsersOnWebpage(allUsers);
+        } catch (error) {
+            console.error('Error during fetching all users:', error);
+        }
+    }
+    function displayAllUsersInTable(allUsers) {
+        const userTableBody = document.querySelector('#user-table tbody');
+
+        // Clear previous content
+        userTableBody.innerHTML = '';
+
+        // Iterate over all users and create HTML table rows
+        allUsers.forEach(user => {
+            const row = userTableBody.insertRow();
+
+            // Iterate over user properties and create cells
+            for (const key in user) {
+                if (Object.prototype.hasOwnProperty.call(user, key)) {
+                    const cell = row.insertCell();
+                    cell.textContent = user[key];
+                }
+            }
+        });
+    }
+
+    // Call the displayAllUsers function when the page loads or as needed
+    document.addEventListener('DOMContentLoaded', function () {
+        displayAllUsers();
+    });
+    
+    function displayAllUsersOnWebpage(allUsers) {
+        const allUsersContainer = document.getElementById('all-users-container');
+
+        // Check if the element exists before updating its content
+        if (allUsersContainer) {
+            // Clear previous content
+            allUsersContainer.innerHTML = '';
+
+            // Iterate over all users and create HTML elements to display them
+            allUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.textContent = JSON.stringify(user);
+                allUsersContainer.appendChild(userItem);
+            });
+        } else {
+            console.error("Element with id 'all-users-container' not found.");
+        }
+    }
+
+
+</script>
+
+</body>
+</html>
